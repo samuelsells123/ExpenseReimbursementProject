@@ -5,8 +5,9 @@ public class ReimbursementRequest {
 	private int requestNumber;
 	private double amount;
 	private String description;
-	private boolean approved;
-	private String managerApproved;
+	
+	private String status;
+	private String manager;
 	
 	public ReimbursementRequest(int employeeNumber, int requestNumber, double amount, String description) {
 		super();
@@ -14,8 +15,18 @@ public class ReimbursementRequest {
 		this.requestNumber = requestNumber;
 		this.amount = amount;
 		this.description = description;
-		this.approved = false;
-		this.managerApproved = "N/A";
+		this.status = "Pending";
+		this.manager = "N/A";
+	}
+	
+	public ReimbursementRequest(int employeeNumber, int requestNumber, double amount, String description, String status, String manager) {
+		super();
+		this.employeeNumber = employeeNumber;
+		this.requestNumber = requestNumber;
+		this.amount = amount;
+		this.description = description;
+		this.status = status;
+		this.manager = manager;
 	}
 	
 	public ReimbursementRequest() {
@@ -53,16 +64,21 @@ public class ReimbursementRequest {
 		this.description = description;
 	}
 	
-	public boolean getApproval() {
-		return approved;
+	public String getStatus() {
+		return status;
 	}
 	
-	public String getManagerApproved() {
-		return managerApproved;
+	public String getManager() {
+		return manager;
 	}
 	
 	public void approve(String managerApproved) {
-		this.approved = true;
-		this.managerApproved = managerApproved;
+		this.status = "Approved";
+		this.manager = managerApproved;
+	}
+	
+	public void deny(String managerDenied) {
+		this.status = "Denied";
+		this.manager = managerDenied;
 	}
 }

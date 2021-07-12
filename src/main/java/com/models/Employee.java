@@ -39,7 +39,7 @@ public final class Employee implements Comparable<Employee> {
 		this.name = name;
 	}
 
-	public double isSalary() {
+	public double getSalary() {
 		return salary;
 	}
 

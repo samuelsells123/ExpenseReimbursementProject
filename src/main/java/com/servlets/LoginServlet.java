@@ -12,6 +12,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 @WebServlet("/LoginServlet")
 public class LoginServlet extends HttpServlet {
@@ -33,6 +34,7 @@ public class LoginServlet extends HttpServlet {
     	String password = req.getParameter("password");
     	
     	ReimbursementService service = new ReimbursementService();
+    	
     	Map<String, LoginInfo> loginInfo = service.getLoginInfo();
     	RequestDispatcher dispatcher;
     	
@@ -40,10 +42,16 @@ public class LoginServlet extends HttpServlet {
     		Map<Integer, Employee> employees = service.getAllEmployees();
     		int employeeNumber = loginInfo.get(username).getEmployeeNumber();
     		
-    		if(employees.get(employeeNumber).isManager())
+    		HttpSession session = req.getSession();
+    		session.setAttribute("employeeNumber", employeeNumber);
+    		session.setAttribute("isManager", employees.get(employeeNumber).isManager());
+    		
+    		if(employees.get(employeeNumber).isManager()) {
     			dispatcher = req.getRequestDispatcher("homepages/managerhomepage.jsp");
-    		else
+    		}
+    		else {
     			dispatcher = req.getRequestDispatcher("homepages/employeehomepage.jsp");
+    		}
 		}
     	else
     		dispatcher = req.getRequestDispatcher("loginfail.jsp");
