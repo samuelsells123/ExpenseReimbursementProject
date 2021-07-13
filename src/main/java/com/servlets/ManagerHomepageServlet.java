@@ -41,6 +41,10 @@ public class ManagerHomepageServlet extends HttpServlet {
     		viewEmployees(req, resp, service);
     	else if(req.getParameter("button-4") != null)
     		viewSingleEmployeeRequests(req, resp, service);
+    	else if(req.getParameter("button-5") != null) {	
+			RequestDispatcher dispatcher = req.getRequestDispatcher("homepages/employeehomepage.jsp");
+    		dispatcher.include(req, resp);
+		}
 		else {	
 			RequestDispatcher dispatcher = req.getRequestDispatcher("index.jsp");
     		dispatcher.include(req, resp);

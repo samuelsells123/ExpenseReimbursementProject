@@ -1,14 +1,10 @@
 package com.service;
 
-import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Map;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-
 import com.jdbc.DBconnection;
 import com.models.*;
 
@@ -17,6 +13,89 @@ public class ReimbursementService {
 		
 	}
 	
+	//Sends SQL query to database
+	public ResultSet sendSQLquery(String sqlMessage, String failMessage) {
+        ResultSet rs = null;
+		
+		try(Connection connection = DBconnection.getConnection()) {
+            PreparedStatement ps = connection.prepareStatement(sqlMessage);
+            rs = ps.executeQuery();
+            
+        } catch(Exception e) {
+            System.out.println(failMessage + " " + e.getMessage());
+        }
+		
+		return rs;
+	}
+	
+	//Adds employee to database
+	public void addEmployee(int employeeNumber, String name, double salary, String city, String state) {
+		String sql = "";
+        
+        try(Connection connection = DBconnection.getConnection()) {
+            sql = "INSERT INTO EMPLOYEES (EMPLOYEENUMBER, NAME, SALARY, CITY, STATE, ISMANAGER) "
+            		+ "VALUES (" + employeeNumber
+            		+ ", " + "'" + name + "'"
+            		+ ", " + salary
+            		+ ", " +  "'" + city + "'" 
+            		+ ", " + "'" + state + "'"
+            		+ ", 0)";
+            
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+        } catch(Exception e) {
+            System.out.println("Failed to add reimbursement request to database" + e.getMessage());
+        }
+	}
+	
+	//Adds acount to database
+	public void addAcount(int employeeNumber, String username, String password) {
+		String sql = "";
+        
+        try(Connection connection = DBconnection.getConnection()) {
+            sql = "INSERT INTO LOGIN (EMPLOYEENUMBER, USERNAME, PASSWORD) "
+            		+ "VALUES (" + employeeNumber
+            		+ ", " + "'" + username + "'" 
+            		+ ", " + "'" + password + "')";
+            
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+        } catch(Exception e) {
+            System.out.println("Failed to add reimbursement request to database" + e.getMessage());
+        }
+	}
+	
+	//Approves the reimbursement request whose number is specified
+	public void approve(int requestNumber, String managerName) {
+		String sql = "UPDATE REIMBURSEMENTREQUESTS "
+            		+ "SET MANAGER = '" + managerName + "', STATUS = 'Approved'"
+            		+ "WHERE REQUESTNUMBER = " + requestNumber;
+        String failMessage = "Failed to approve request in database";
+		
+		sendSQLquery(sql, failMessage);
+	}
+	
+	//Denies the reimbursement request whose number is specfied
+	public void deny(int requestNumber, String managerName) {
+		String sql = "UPDATE REIMBURSEMENTREQUESTS "
+            		+ "SET MANAGER = '" + managerName + "', STATUS = 'Denied'"
+            		+ "WHERE REQUESTNUMBER = " + requestNumber;
+		String failMessage = "Failed to approve request in database";
+        
+		sendSQLquery(sql, failMessage);
+	}
+	
+	//Updates the specified employees info with the values given
+	public void updateEmployeeInfo(int employeeNumber, String name, String city, String state) {
+        String sql = "UPDATE EMPLOYEES "
+        		+ "SET NAME = '" + name + "', CITY = '" + city + "', STATE = '" + state + "' "
+        		+ "WHERE EMPLOYEENUMBER = " + employeeNumber;
+        String failMessage = "Failed to update employee info in database";
+	
+        sendSQLquery(sql, failMessage);
+	}
+	
+	//Returns map of all employees
 	public Map<Integer, Employee> getAllEmployees(){		
 		String sql = "";
 		Map<Integer, Employee> employees = null;
@@ -39,9 +118,6 @@ public class ReimbursementService {
                 
                 employees.put(employeeNumber, e);
             }
-            return employees;
-
-
         } catch(Exception e) {
             System.out.println("Failed to obtain employee info from database " + e.getMessage());
         }
@@ -49,6 +125,7 @@ public class ReimbursementService {
         return employees;
 	}
 	
+	//Returns a map with all login info
 	public Map<String, LoginInfo> getLoginInfo(){
 		String sql = "";
 		Map<String, LoginInfo> loginInfo = null;
@@ -68,9 +145,6 @@ public class ReimbursementService {
                 
                 loginInfo.put(username, l);
             }
-            return loginInfo;
-
-
         } catch(Exception e) {
             System.out.println("Failed to obtain login info from database " + e.getMessage());
         }
@@ -78,6 +152,7 @@ public class ReimbursementService {
         return loginInfo;
 	}
 	
+	//Returns a map with all reimbursement requests
 	public Map<Integer, ReimbursementRequest> getAllRequests(){
 		String sql = "";
 		Map<Integer, ReimbursementRequest> requests = null;
@@ -100,9 +175,6 @@ public class ReimbursementService {
                 
                 requests.put(requestNumber, r);
             }
-            return requests;
-
-
         } catch(Exception e) {
             System.out.println("Failed to obtain login info from database " + e.getMessage());
         }
@@ -110,6 +182,7 @@ public class ReimbursementService {
         return requests;
 	}
 	
+	//Adds a reimbursement request to the database 
 	public void addRequest(int employeeNumber, double amount, String description) {
 		String sql = "";
         
@@ -129,21 +202,7 @@ public class ReimbursementService {
         }
 	}
 	
-	public void updateEmployeeInfo(int employeeNumber, String name, String city, String state) {
-		String sql = "";
-        
-        try(Connection connection = DBconnection.getConnection()) {
-            sql = "UPDATE EMPLOYEES "
-            		+ "SET NAME = '" + name + "', CITY = '" + city + "', STATE = '" + state + "' "
-            		+ "WHERE EMPLOYEENUMBER = " + employeeNumber;
-            
-            PreparedStatement ps = connection.prepareStatement(sql);
-            ResultSet rs = ps.executeQuery();
-        } catch(Exception e) {
-            System.out.println("Failed to update employee info in database " + e.getMessage());
-        }
-	}
-	
+	//Generates a new employee number for a new user
 	public int generateEmployeeNumber() {
 		String sql = "";
         
@@ -162,6 +221,7 @@ public class ReimbursementService {
         return -1;
 	}
 	
+	//Generates a new request number for a recently submitted request
 	public int generateRequestNumber() {
 		String sql = "";
 		
@@ -178,35 +238,5 @@ public class ReimbursementService {
         }
         
         return -1;
-	}
-	
-	public void approve(int requestNumber, String managerName) {
-		String sql = "";
-        
-        try(Connection connection = DBconnection.getConnection()) {
-            sql = "UPDATE REIMBURSEMENTREQUESTS "
-            		+ "SET MANAGER = '" + managerName + "', STATUS = 'APPROVED'"
-            		+ "WHERE REQUESTNUMBER = " + requestNumber;
-            
-            PreparedStatement ps = connection.prepareStatement(sql);
-            ResultSet rs = ps.executeQuery();
-        } catch(Exception e) {
-            System.out.println("Failed to approve request in database " + e.getMessage());
-        }
-	}
-	
-	public void deny(int requestNumber, String managerName) {
-		String sql = "";
-        
-        try(Connection connection = DBconnection.getConnection()) {
-            sql = "UPDATE REIMBURSEMENTREQUESTS "
-            		+ "SET MANAGER = '" + managerName + "', STATUS = 'DENIED'"
-            		+ "WHERE REQUESTNUMBER = " + requestNumber;
-            
-            PreparedStatement ps = connection.prepareStatement(sql);
-            ResultSet rs = ps.executeQuery();
-        } catch(Exception e) {
-            System.out.println("Failed to approve request in database " + e.getMessage());
-        }
 	}
 }

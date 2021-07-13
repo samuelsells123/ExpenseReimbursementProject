@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 public class DBconnection {
+	//Creates connection with database and returns it. Returns null if connection fails
 	public static Connection getConnection() {
 		Properties props = new Properties();
 		FileInputStream fileIn = null;
@@ -17,13 +18,12 @@ public class DBconnection {
 			fileIn = new FileInputStream("C:\\Users\\merli\\eclipse-workspace\\ExpenseReimbursementProject\\db.properties");
 			props.load(fileIn);
 
-			// load the Driver Class
+			// loads the Driver Class
 			Class.forName(props.getProperty("DB_DRIVER_CLASS"));
 
-			// create the connection now
-			connection = DriverManager.getConnection(props.getProperty("DB_URL"),
-					props.getProperty("DB_USERNAME"),
-					props.getProperty("DB_PASSWORD"));
+			// creates the database connection
+			connection = DriverManager.getConnection(props.getProperty("DB_URL"), props.getProperty("DB_USERNAME"), props.getProperty("DB_PASSWORD"));
+			
 		} catch (IOException | ClassNotFoundException | SQLException e) {
 			// TODO Auto-generated catch block
 			System.out.println("Database Connection Failed");
